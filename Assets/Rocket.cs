@@ -8,6 +8,9 @@ public class Rocket : MonoBehaviour
     Rigidbody rigidBody;
     AudioSource audioSource;
 
+    [SerializeField] float rcsThrust = 100f;
+
+    Vector3 startVector = new Vector3(0.0f, 1.0f, 0.0f);
 
     // Start is called before the first frame update
     void Start()
@@ -19,6 +22,17 @@ public class Rocket : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Camera.main.transform.position = new Vector3 (
+            transform.position.x,
+            transform.position.y + 10,
+            Camera.main.transform.position.z );
+
+        if (Input.GetKey(KeyCode.S)) {
+
+            transform.position = startVector * 3;
+
+        }
+
         Thrust();
         Rotate(); 
     }
@@ -27,7 +41,8 @@ public class Rocket : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space)) {
             print("thrusting ");
-            rigidBody.AddRelativeForce(Vector3.up);
+            float thrustSpeed = rcsThrust * Time.deltaTime;
+            rigidBody.AddRelativeForce(Vector3.up * thrustSpeed);
 
             if (!audioSource.isPlaying) {
                 audioSource.Play();
@@ -41,19 +56,30 @@ public class Rocket : MonoBehaviour
         } 
     }
 
-    void Rotate() {
+    void PerformeRotation(int direction) {
 
-        rigidBody.freezeRotation = true; // we have got manual controll here and need to freeze fisical rotation
+        float rotationSpeed = rcsThrust * Time.deltaTime;
+
+        // We have got manual controll here and need to freeze fisical rotation
+        rigidBody.freezeRotation = true;
+
+        transform.Rotate(direction * Vector3.forward * rotationSpeed);
+
+        rigidBody.freezeRotation = false; 
+
+    }
+
+    void Rotate() {
         
         if (Input.GetKey(KeyCode.A)) {
-            print("rotaiting left ");
-            transform.Rotate(Vector3.forward);
-        } else if (Input.GetKey(KeyCode.D)) {
-            print("rotaiting right ");
-            transform.Rotate(-Vector3.forward);
-        }
 
-        rigidBody.freezeRotation = false;
+            PerformeRotation(1);
+
+        } else if (Input.GetKey(KeyCode.D)) {
+
+            PerformeRotation(-1);
+
+        }
 
     }
 }
